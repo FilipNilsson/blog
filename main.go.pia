@@ -1,0 +1,44 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+)
+
+/*
+Convert below curl call to go code
+curl 'https://www.axis.com/api/pia/v2/items?categories=audio,cameras,encdec,modular,networkswitches,pac,recorders1&fields=none,category,name&orderBy=name&state=40&type=ProductVariant' \
+ -H 'Referer: https://www.axis.com/en-us/products/product-selector' \
+ -H 'Authorization: apikey da6cac02-e554-44c5-8125-1281982c3cdb'
+*/
+
+func main() {
+	var v url.Values
+	v.Set("categories", "audio,cameras,encdec,modular,networkswitches,pac,recorders")
+	v.Set("fields", "none,category,name")
+	v.Set("orderBy", "name")
+	v.Set("state", "40")
+	v.Set("type", "ProductVariant")
+	r, err := http.NewRequest("GET", "https://www.axis.com/api/pia/v2/items"+v.Encode(), nil)
+
+	r.Header.Set("Referer", "https://www.axis.com/en-us/products/product-selector")
+	r.Header.Set("Authorization", "apikey da6cac02-e554-44c5-8125-1281982c3cdb")
+
+	r, err = http.DefaultClient.do(r)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	io.Copy(os.Stdout, r.Body)
+}

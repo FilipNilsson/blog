@@ -1,0 +1,22 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		d := Device{Serial: "0048..."}
+		enc := json.NewEncoder(w)
+		enc.Encode(&d)
+		fmt.Println("GET")
+	})
+
+	http.ListenAndServe(":8080", nil)
+}
+
+type Device struct {
+	Serial string `json:"serial"`
+}
